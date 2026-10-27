@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Pyme Fusagasugá - Sistema de Inventario POO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .active-tab { background-color: #f1f5f9; border-left: 4px solid #2563eb; color: #1d4ed8; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar / Menú Lateral -->
+    <aside class="w-full md:w-64 bg-white border-r border-slate-200 p-6 flex flex-col justify-between shadow-xs">
+        <div>
+            <!-- Branding -->
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-store text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-900 leading-tight">Mi Pyme</h2>
+                    <p class="text-xs text-slate-500 font-medium">Fusagasugá - POO</p>
+                </div>
+            </div>
+
+            <!-- Navegación y Filtros -->
+            <nav class="space-y-1">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Categorías</p>
+                <button onclick="filtrarCategoria('todos')" id="tab-todos" class="active-tab w-full text-left flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm transition">
+                    <i class="fa-solid fa-boxes-stacked w-5"></i>
+                    <span>Todos</span>
+                    <span id="badge-todos" class="ml-auto bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full font-semibold">21</span>
+                </button>
+                <button onclick="filtrarCategoria('normal')" id="tab-normal" class="w-full text-left flex items-center space-x-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 rounded-xl text-sm transition">
+                    <i class="fa-solid fa-tag w-5"></i>
+                    <span>Normales</span>
+                    <span id="badge-normal" class="ml-auto bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-semibold">12</span>
+                </button>
+                <button onclick="filtrarCategoria('perecedero')" id="tab-perecedero" class="w-full text-left flex items-center space-x-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 rounded-xl text-sm transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5"></i>
+                    <span>Perecederos</span>
+                    <span id="badge-perecedero" class="ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full font-semibold">9</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="mt-8 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-600">
+            <p class="font-semibold text-slate-800 mb-1">Versión Terminada</p>
+            <p>U. Cundinamarca</p>
+        </div>
+    </aside>
+
+    <!-- Área Principal -->
+    <main class="flex-grow flex flex-col min-w-0">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-8 flex justify-between items-center shadow-xs">
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">Panel de Control</h1>
+                <p class="text-xs text-slate-500">Gestión de Inventario y Ventas</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="abrirModal('modalAgregar')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3.5 py-2 rounded-xl font-semibold transition flex items-center shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-plus mr-1.5"></i> Agregar Producto
+                </button>
+                <button onclick="abrirModal('modalVenta')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-2 rounded-xl font-semibold transition flex items-center shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-cart-shopping mr-1.5"></i> Registrar Venta
+                </button>
+            </div>
+        </header>
+
+        <!-- Contenido de Dashboard -->
+        <div class="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+            
+            <!-- Tarjetas de Métricas -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-5 rounded-2xl shadow-sm flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-blue-100 font-medium uppercase tracking-wider mb-1">Productos Totales</p>
+                        <h3 id="statTotal" class="text-3xl font-extrabold">21</h3>
+                    </div>
+                    <div class="bg-white/10 p-3 rounded-xl"><i class="fa-solid fa-boxes-stacked text-2xl"></i></div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white p-5 rounded-2xl shadow-sm flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-emerald-100 font-medium uppercase tracking-wider mb-1">Valoración Inventario</p>
+                        <h3 id="statValor" class="text-2xl font-extrabold">$0</h3>
+                    </div>
+                    <div class="bg-white/10 p-3 rounded-xl"><i class="fa-solid fa-cash-register text-2xl"></i></div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Estado de Red</p>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <span class="text-sm font-bold text-slate-800">Sistema Conectado</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 text-slate-600 p-3 rounded-xl border border-slate-100"><i class="fa-solid fa-server text-xl"></i></div>
+                </div>
+            </div>
+
+            <!-- Tabla de Inventario -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50">
+                    <h2 class="font-bold text-slate-800 flex items-center text-base">
+                        <i class="fa-solid fa-list mr-2 text-blue-600"></i> Inventario Completo
+                    </h2>
+                    <div class="relative w-full sm:w-80">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="fa-solid fa-search text-xs"></i></span>
+                        <input type="text" id="searchInput" onkeyup="filtrarInventario()" placeholder="Buscar por ID o nombre..." class="text-xs bg-white border border-slate-300 rounded-xl pl-9 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider font-semibold">
+                                <th class="p-4">ID</th>
+                                <th class="p-4">Tipo</th>
+                                <th class="p-4">Nombre del Producto</th>
+                                <th class="p-4">Detalle (Marca / Vencimiento)</th>
+                                <th class="p-4">Precio (COP)</th>
+                                <th class="p-4">Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaInventario" class="divide-y divide-slate-200 text-sm">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Agregar Producto -->
+    <div id="modalAgregar" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-lg text-slate-900 flex items-center"><i class="fa-solid fa-plus-circle text-blue-600 mr-2"></i>Agregar Nuevo Producto</h3>
+                <button onclick="cerrarModal('modalAgregar')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formAgregar" onsubmit="agregarProducto(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tipo de Producto</label>
+                    <select id="tipoProd" onchange="actualizarLabelTipo()" class="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50">
+                        <option value="normal">Normal (Con Marca)</option>
+                        <option value="perecedero">Perecedero (Con Vencimiento)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">ID</label>
+                        <input type="number" id="addId" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Precio ($)</label>
+                        <input type="number" step="any" id="addPrecio" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nombre</label>
+                    <input type="text" id="addNombre" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cantidad Inicial</label>
+                        <input type="number" id="addCantidad" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label id="labelExtra" class="block text-xs font-bold text-slate-700 uppercase mb-1">Marca</label>
+                        <input type="text" id="addExtra" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="cerrarModal('modalAgregar')" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs rounded-xl font-semibold hover:bg-slate-200 cursor-pointer">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-xs rounded-xl font-semibold hover:bg-blue-700 cursor-pointer shadow-md">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Registrar Venta -->
+    <div id="modalVenta" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-lg text-slate-900 flex items-center"><i class="fa-solid fa-cart-shopping text-emerald-600 mr-2"></i>Registrar Venta</h3>
+                <button onclick="cerrarModal('modalVenta')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formVenta" onsubmit="ejecutarVenta(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">ID a Vender</label>
+                    <input type="number" id="ventaId" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cantidad</label>
+                    <input type="number" id="ventaCantidad" required class="w-full border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="cerrarModal('modalVenta')" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs rounded-xl font-semibold hover:bg-slate-200 cursor-pointer">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white text-xs rounded-xl font-semibold hover:bg-emerald-700 cursor-pointer shadow-md">Confirmar Venta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lógica JavaScript que réplica el arreglo de Java -->
+    <script>
+        let inventario = [
+            { id: 1, tipo: 'perecedero', nombre: "Cafe 2/3 negro 1/3 leche", precio: 2500, cantidad: 15, extra: "20/12/2026" },
+            { id: 2, tipo: 'normal', nombre: "Gaseosa Cola 1.5L", precio: 3500, cantidad: 20, extra: "Coca-Cola" },
+            { id: 3, tipo: 'normal', nombre: "Paquete de Papas Limon", precio: 2000, cantidad: 15, extra: "Margarita" },
+            { id: 4, tipo: 'normal', nombre: "Arroz Blanco 1Lb", precio: 2200, cantidad: 50, extra: "Diana" },
+            { id: 5, tipo: 'normal', nombre: "Aceite Vegetal 1000ml", precio: 8500, cantidad: 25, extra: "Gourmet" },
+            { id: 6, tipo: 'normal', nombre: "Panela Cuadrada", precio: 3500, cantidad: 40, extra: "El Trebol" },
+            { id: 7, tipo: 'normal', nombre: "Jabón en barra x2", precio: 2500, cantidad: 60, extra: "Rey" },
+            { id: 8, tipo: 'normal', nombre: "Galletas de Soda", precio: 1800, cantidad: 35, extra: "Saltín Noel" },
+            { id: 9, tipo: 'normal', nombre: "Atún en aceite", precio: 4500, cantidad: 20, extra: "Van Camp's" },
+            { id: 10, tipo: 'normal', nombre: "Chocolate de Mesa", precio: 5200, cantidad: 18, extra: "Corona" },
+            { id: 11, tipo: 'normal', nombre: "Crema Dental 100g", precio: 3200, cantidad: 22, extra: "Colgate" },
+            { id: 12, tipo: 'normal', nombre: "Frijol Cargamanto 1Lb", precio: 4800, cantidad: 15, extra: "Roa" },
+            { id: 13, tipo: 'normal', nombre: "Papel Higienico x4", precio: 6000, cantidad: 30, extra: "Familia" },
+            { id: 14, tipo: 'perecedero', nombre: "Leche Entera 1L", precio: 3800, cantidad: 30, extra: "01/06/2026" },
+            { id: 15, tipo: 'perecedero', nombre: "Queso Campesino 500g", precio: 6500, cantidad: 10, extra: "28/05/2026" },
+            { id: 16, tipo: 'perecedero', nombre: "Cubeta de Huevos AA", precio: 16000, cantidad: 12, extra: "15/06/2026" },
+            { id: 17, tipo: 'perecedero', nombre: "Pan Tajado Blanco", precio: 4500, cantidad: 8, extra: "25/05/2026" },
+            { id: 18, tipo: 'perecedero', nombre: "Arepas de Maiz x5", precio: 3000, cantidad: 14, extra: "22/05/2026" },
+            { id: 19, tipo: 'perecedero', nombre: "Yogurt de Melocoton", precio: 5500, cantidad: 10, extra: "10/06/2026" },
+            { id: 20, tipo: 'perecedero', nombre: "Salchicha Tradicional", precio: 7200, cantidad: 15, extra: "05/06/2026" },
+            { id: 21, tipo: 'perecedero', nombre: "Mantequilla 250g", precio: 4000, cantidad: 12, extra: "30/06/2026" }
+        ];
+
+        let filtroActual = 'todos';
+
+        function renderTabla(lista = inventario) {
+            const tbody = document.getElementById('tablaInventario');
+            tbody.innerHTML = '';
+            
+            document.getElementById('statTotal').innerText = inventario.length;
+            document.getElementById('badge-todos').innerText = inventario.length;
+            document.getElementById('badge-normal').innerText = inventario.filter(p => p.tipo === 'normal').length;
+            document.getElementById('badge-perecedero').innerText = inventario.filter(p => p.tipo === 'perecedero').length;
+
+            const valorTotal = inventario.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+            document.getElementById('statValor').innerText = "$" + valorTotal.toLocaleString();
+
+            lista.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-4 font-semibold text-slate-700">#${p.id}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.tipo === 'perecedero' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">
+                            ${p.tipo === 'perecedero' ? 'PERECEDERO' : 'NORMAL'}
+                        </span>
+                    </td>
+                    <td class="p-4 font-medium text-slate-900">${p.nombre}</td>
+                    <td class="p-4 text-slate-500 text-xs">${p.tipo === 'perecedero' ? 'Vence: ' + p.extra : 'Marca: ' + p.extra}</td>
+                    <td class="p-4 font-semibold text-emerald-600">$${p.precio.toLocaleString()}</td>
+                    <td class="p-4"><span class="bg-slate-100 px-2.5 py-1 rounded-lg font-bold text-slate-700 text-xs">${p.cantidad} und</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filtrarCategoria(cat) {
+            filtroActual = cat;
+            ['todos', 'normal', 'perecedero'].forEach(c => {
+                const tab = document.getElementById(`tab-${c}`);
+                if(c === cat) {
+                    tab.classList.add('active-tab');
+                    tab.classList.remove('text-slate-600');
+                } else {
+                    tab.classList.remove('active-tab');
+                    tab.classList.add('text-slate-600');
+                }
+            });
+
+            if(cat === 'todos') {
+                renderTabla(inventario);
+            } else {
+                renderTabla(inventario.filter(p => p.tipo === cat));
+            }
+        }
+
+        function filtrarInventario() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtrados = inventario.filter(p => 
+                (filtroActual === 'todos' || p.tipo === filtroActual) &&
+                (p.nombre.toLowerCase().includes(query) || p.id.toString().includes(query))
+            );
+            renderTabla(filtrados);
+        }
+
+        function abrirModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        function actualizarLabelTipo() {
+            const tipo = document.getElementById('tipoProd').value;
+            document.getElementById('labelExtra').innerText = tipo === 'normal' ? 'Marca' : 'Vencimiento (DD/MM/AAAA)';
+        }
+
+        function agregarProducto(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('tipoProd').value;
+            const id = parseInt(document.getElementById('addId').value);
+            const precio = parseFloat(document.getElementById('addPrecio').value);
+            const nombre = document.getElementById('addNombre').value;
+            const cantidad = parseInt(document.getElementById('addCantidad').value);
+            const extra = document.getElementById('addExtra').value;
+
+            inventario.push({ id, tipo, nombre, precio, cantidad, extra });
+            filtrarCategoria(filtroActual);
+            cerrarModal('modalAgregar');
+            document.getElementById('formAgregar').reset();
+            alert("¡Guardado exitosamente!");
+        }
+
+        function ejecutarVenta(e) {
+            e.preventDefault();
+            const idVenta = parseInt(document.getElementById('ventaId').value);
+            const cantVenta = parseInt(document.getElementById('ventaCantidad').value);
+
+            const producto = inventario.find(p => p.id === idVenta);
+            if (!producto) {
+                alert("ID no existe.");
+                return;
+            }
+
+            if (producto.cantidad >= cantVenta) {
+                producto.cantidad -= cantVenta;
+                const total = cantVenta * producto.precio;
+                filtrarCategoria(filtroActual);
+                cerrarModal('modalVenta');
+                document.getElementById('formVenta').reset();
+                alert(`Venta Exitosa. Total: $${total.toLocaleString()}`);
+            } else {
+                alert("Stock insuficiente.");
+            }
+        }
+
+        // Carga Inicial
+        renderTabla();
+    </script>
+</body>
+</html>
